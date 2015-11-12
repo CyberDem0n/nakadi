@@ -14,8 +14,12 @@ ENV METRICS_FOLDER /tmp_metrics
 RUN mkdir ${METRICS_FOLDER}
 RUN chmod 777 ${METRICS_FOLDER}
 
-# run with gunicorn to provide concurrency; params:
-# - 32 workers (processes)
-# - worker type: eventlet ("green threads")
-# - log access_log to stderr
-CMD gunicorn --workers 32 --worker-class eventlet --access-logfile - --bind 0.0.0.0:8080 nakadi.hack:application
+COPY nginx.conf /
+RUN apt-get update && \
+    apt-get install -y ca-certificates nginx && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY nakadi.sh /
+CMD ./nakadi.sh
+
+EXPOSE 8080
